@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, it } from 'node:test';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import assert from 'node:assert/strict';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -16,7 +18,7 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+      assert.strictEqual(appController.getHello(), 'Hello World!');
     });
   });
 });
