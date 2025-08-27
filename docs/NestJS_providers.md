@@ -1,9 +1,9 @@
 # Providers
-Providers are a core concept of NestJS, which phylosophy is to be injected as dependencies,
+Providers are a core concept of NestJS, whose philosophy is to be injected as dependencies,
 allowing objects to form various relationships with each other. The responsibility of
 "wiring up" these objects is largely handled by the Nest runtime system.
 
-> Since Nest allows you to design and organize dependencies in an object-oriented manner, it allows suggests you to follow SOLID prinpicles.
+> Since Nest allows you to design and organize dependencies in an object-oriented manner, it suggests you to follow SOLID principles.
 
 ## Services
 Services are in charge of handling all the business logic of the application.
