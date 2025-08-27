@@ -52,7 +52,7 @@ import { APP_PIPE } from "@nestjs/core"
 @Module({
   providers: [
     {
-      provide: APP_MODULE,
+      provide: APP_PIPE,
       useClass: ValidationPipe
     }
   ]
