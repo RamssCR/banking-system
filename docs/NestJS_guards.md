@@ -5,7 +5,7 @@ the `CanActivate` interface.
 ## Example
 ### Authentication (non-role-based)
 ```TS
-import { Injectable, CanActive, ExecutionContext } from "@nestjs/common"
+import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common"
 import { Observable } from "rxjs"
 
 @Injectable()
