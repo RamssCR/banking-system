@@ -1,4 +1,4 @@
-# Banking Systems
+# Banking System
 
 ## Models
 
