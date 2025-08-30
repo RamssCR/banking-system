@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     // Specify module code generation
-    "rootDir": "./src",
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "resolvePackageJsonExports": true,
