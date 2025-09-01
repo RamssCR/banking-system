@@ -57,3 +57,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # TypeScript
 tsconfig.build.tsbuildinfo
+
+# Request Files
+request.http
+request-soap.http
