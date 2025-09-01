@@ -7,8 +7,10 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { RolesService } from './roles.service';
+import { CreateRoleDto } from './dto/create-role.dto';
 import { Role } from './entities/role.entity';
+import { RolesService } from './roles.service';
+import { UpdateRoleDto } from './dto/update-role.dto';
 
 @Controller('roles')
 export class RolesController {
@@ -25,14 +27,14 @@ export class RolesController {
   }
 
   @Post()
-  async create(@Body() role: Role): Promise<Role> {
+  async create(@Body() role: CreateRoleDto): Promise<Role> {
     return await this.rolesService.create(role);
   }
 
   @Patch(':id')
   async update(
     @Param('id') id: number,
-    @Body() role: Partial<Role>,
+    @Body() role: UpdateRoleDto,
   ): Promise<Role | null> {
     return await this.rolesService.update(id, role);
   }
