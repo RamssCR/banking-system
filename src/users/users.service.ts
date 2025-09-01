@@ -6,11 +6,10 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, QueryFailedError } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { Role } from '#roles/entities/role.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '#users/entities/user.entity';
-import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class UsersService {
@@ -30,7 +29,7 @@ export class UsersService {
     });
 
     return {
-      data: instanceToPlain(data),
+      data,
       total,
       page,
       lastPage: Math.ceil(total / limit),
@@ -45,7 +44,7 @@ export class UsersService {
       });
       if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
-      return instanceToPlain(user) as User;
+      return user;
     } catch (error) {
       if (error instanceof QueryFailedError) {
         throw new BadRequestException(`User with ID ${id} not found`);
@@ -92,7 +91,7 @@ export class UsersService {
         role: defaultRole,
       });
       const savedUser = await this.userRepository.save(createdUser);
-      return instanceToPlain(savedUser) as User;
+      return savedUser;
     } catch (error) {
       if (error instanceof QueryFailedError) {
         throw new InternalServerErrorException(error.message);
