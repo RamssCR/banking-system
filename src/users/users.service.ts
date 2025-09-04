@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -50,13 +45,10 @@ export class UsersService {
 
   async findOneByEmail(email: string): Promise<User> {
     try {
-      const user = await this.userRepository.findOneOrFail({
+      return await this.userRepository.findOneOrFail({
         where: { email },
         relations: ['role'],
       });
-      if (!user) throw new BadRequestException('Incorrect user or password');
-
-      return user;
     } catch (error) {
       throw handleDBError(error, 'An error occurred while getting the user');
     }
@@ -67,10 +59,6 @@ export class UsersService {
       const defaultRole = await this.roleRepository.findOneOrFail({
         where: { name: 'user' },
       });
-      if (!defaultRole)
-        throw new InternalServerErrorException(
-          'An error has occurred while creating the user.',
-        );
 
       const createdUser = this.userRepository.create({
         ...user,

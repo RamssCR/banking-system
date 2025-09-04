@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -23,10 +19,7 @@ export class RolesService {
 
   async findOne(id: number): Promise<Role> {
     try {
-      const role = await this.roleRepository.findOneByOrFail({ id });
-      if (!role) throw new BadRequestException(`Role ${id} not found`);
-
-      return role;
+      return await this.roleRepository.findOneByOrFail({ id });
     } catch (error) {
       throw handleDBError(error, 'An error occurred while getting the role');
     }
@@ -56,11 +49,9 @@ export class RolesService {
 
   async update(id: number, dto: UpdateRoleDto): Promise<Role> {
     try {
-      const role = await this.findOne(id);
-      if (!role) throw new NotFoundException(`Role with ID ${id} not found`);
-
+      await this.findOne(id);
       await this.roleRepository.update(id, dto);
-      return this.findOne(id);
+      return await this.findOne(id);
     } catch (error) {
       throw handleDBError(error, 'An error occurred while updating the role');
     }
