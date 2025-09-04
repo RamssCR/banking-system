@@ -22,7 +22,7 @@ export class RolesController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Role | null> {
+  async findOne(@Param('id') id: number): Promise<Role> {
     return await this.rolesService.findOne(id);
   }
 
@@ -35,7 +35,7 @@ export class RolesController {
   async update(
     @Param('id') id: number,
     @Body() role: UpdateRoleDto,
-  ): Promise<Role | null> {
+  ): Promise<Role> {
     return await this.rolesService.update(id, role);
   }
 

@@ -21,7 +21,7 @@ export class RolesService {
     return await this.roleRepository.find();
   }
 
-  async findOne(id: number): Promise<Role | null> {
+  async findOne(id: number): Promise<Role> {
     try {
       const role = await this.roleRepository.findOneByOrFail({ id });
       if (!role) throw new BadRequestException(`Role ${id} not found`);
@@ -53,7 +53,7 @@ export class RolesService {
     }
   }
 
-  async update(id: number, dto: UpdateRoleDto): Promise<Role | null> {
+  async update(id: number, dto: UpdateRoleDto): Promise<Role> {
     try {
       const role = await this.findOne(id);
       if (!role) throw new NotFoundException(`Role with ID ${id} not found`);

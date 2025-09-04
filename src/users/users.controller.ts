@@ -24,13 +24,8 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<User | null> {
+  async findOne(@Param('id') id: number): Promise<User> {
     return this.usersService.findOne(id);
-  }
-
-  @Get()
-  async findOneByEmail(@Query('email') email: string): Promise<User | null> {
-    return this.usersService.findOneByEmail(email);
   }
 
   @Post()
