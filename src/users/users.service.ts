@@ -6,10 +6,11 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Role } from '#roles/entities/role.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '#users/entities/user.entity';
+import { handleDBError } from '#common/helpers/handleDBErrors';
 
 @Injectable()
 export class UsersService {
@@ -38,21 +39,12 @@ export class UsersService {
 
   async findOne(id: number): Promise<User> {
     try {
-      const user = await this.userRepository.findOneOrFail({
+      return await this.userRepository.findOneOrFail({
         where: { id },
         relations: ['role'],
       });
-      if (!user) throw new NotFoundException(`User with ID ${id} not found`);
-
-      return user;
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw new BadRequestException(`User with ID ${id} not found`);
-      }
-
-      throw new InternalServerErrorException(
-        'An error has ocurred while getting the user',
-      );
+      throw handleDBError(error, 'An error occurred while getting the user');
     }
   }
 
@@ -66,13 +58,7 @@ export class UsersService {
 
       return user;
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw new BadRequestException(error.message);
-      }
-
-      throw new InternalServerErrorException(
-        'An error ocurred while getting the user',
-      );
+      throw handleDBError(error, 'An error occurred while getting the user');
     }
   }
 
@@ -93,17 +79,24 @@ export class UsersService {
       const savedUser = await this.userRepository.save(createdUser);
       return savedUser;
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw new InternalServerErrorException(error.message);
-      }
-
-      throw new InternalServerErrorException(
-        'An error has occurred while creating the user.',
-      );
+      throw handleDBError(error, 'An error occurred while creating the user.');
     }
   }
 
-  async update(id: number, dto: UpdateUserDto): Promise<User | null> {
+  async restore(id: number): Promise<void> {
+    try {
+      const result = await this.userRepository.restore(id);
+      if (result.affected === 0) {
+        throw new NotFoundException(
+          'An error occurred while restoring the user.',
+        );
+      }
+    } catch (error) {
+      throw handleDBError(error, 'An error occurred while restoring the user.');
+    }
+  }
+
+  async update(id: number, dto: UpdateUserDto): Promise<User> {
     try {
       const { roleId, ...user } = dto;
       const foundUser = await this.findOne(id);
@@ -118,13 +111,7 @@ export class UsersService {
       Object.assign(foundUser, user);
       return await this.userRepository.save(foundUser);
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw new InternalServerErrorException(error.message);
-      }
-
-      throw new InternalServerErrorException(
-        'An error has ocurred while updating the user.',
-      );
+      throw handleDBError(error, 'An error occurred while updating the user');
     }
   }
 
@@ -135,13 +122,7 @@ export class UsersService {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw new InternalServerErrorException(error.message);
-      }
-
-      throw new InternalServerErrorException(
-        'An error has ocurred while deleting the user',
-      );
+      throw handleDBError(error, 'An error occurred while deleting the user');
     }
   }
 }

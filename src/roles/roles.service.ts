@@ -1,14 +1,14 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { QueryFailedError, Repository } from 'typeorm';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Role } from './entities/role.entity';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { handleDBError } from '#common/helpers/handleDBErrors';
 
 @Injectable()
 export class RolesService {
@@ -28,13 +28,7 @@ export class RolesService {
 
       return role;
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw new InternalServerErrorException(error.message);
-      }
-
-      throw new InternalServerErrorException(
-        'An error has ocurred while getting the role',
-      );
+      throw handleDBError(error, 'An error occurred while getting the role');
     }
   }
 
@@ -43,13 +37,20 @@ export class RolesService {
       const createdRole = this.roleRepository.create(role);
       return await this.roleRepository.save(createdRole);
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw new InternalServerErrorException(error.message);
-      }
+      throw handleDBError(error, 'An error occurred while creating the role');
+    }
+  }
 
-      throw new InternalServerErrorException(
-        'An error has ocurred while creating the role',
-      );
+  async restore(id: number): Promise<void> {
+    try {
+      const result = await this.roleRepository.restore(id);
+      if (result.affected === 0) {
+        throw new NotFoundException(
+          'An error occurred while restoring the role',
+        );
+      }
+    } catch (error) {
+      throw handleDBError(error, 'An error occurred while restoring the user');
     }
   }
 
@@ -61,13 +62,7 @@ export class RolesService {
       await this.roleRepository.update(id, dto);
       return this.findOne(id);
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw new InternalServerErrorException(error.message);
-      }
-
-      throw new InternalServerErrorException(
-        'An error has ocurred while updating the role',
-      );
+      throw handleDBError(error, 'An error occurred while updating the role');
     }
   }
 
@@ -77,13 +72,7 @@ export class RolesService {
       if (result.affected === 0)
         throw new NotFoundException(`User with ID ${id} not found`);
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw new InternalServerErrorException(error.message);
-      }
-
-      throw new InternalServerErrorException(
-        'An error has ocurred while deleting the role',
-      );
+      throw handleDBError(error, 'An error occurred while deleting the role');
     }
   }
 }
