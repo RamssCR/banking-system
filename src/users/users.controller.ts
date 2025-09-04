@@ -33,8 +33,16 @@ export class UsersController {
     return this.usersService.create(user);
   }
 
+  @Patch(':id/restore')
+  async restore(@Param('id') id: number): Promise<void> {
+    return this.usersService.restore(id);
+  }
+
   @Patch(':id')
-  async update(@Param('id') id: number, @Body() user: UpdateUserDto) {
+  async update(
+    @Param('id') id: number,
+    @Body() user: UpdateUserDto,
+  ): Promise<User> {
     return this.usersService.update(id, user);
   }
 

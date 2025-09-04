@@ -31,6 +31,11 @@ export class RolesController {
     return await this.rolesService.create(role);
   }
 
+  @Patch(':id/restore')
+  async restore(@Param('id') id: number): Promise<void> {
+    return await this.rolesService.restore(id);
+  }
+
   @Patch(':id')
   async update(
     @Param('id') id: number,
