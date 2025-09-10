@@ -3,21 +3,16 @@ import {
   Controller,
   HttpCode,
   Post,
-  Req,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { AuthGuard } from '#common/guards/auth.guard';
 import { AuthResponse } from './interfaces/auth-response.interface';
 import { AuthService } from './auth.service';
+import { Cookies } from '#common/decorators/cookies.decorator';
 import { SetAuthTokenInterceptor } from '#common/interceptors/set-auth-token.interceptor';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import type { Request } from 'express';
-
-interface AuthRequest extends Request {
-  cookies: {
-    refresh_token: string;
-  };
-}
 
 @Controller('auth')
 @UseInterceptors(SetAuthTokenInterceptor)
@@ -36,10 +31,10 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @UseGuards(AuthGuard)
   async refresh(
-    @Req() req: AuthRequest,
+    @Cookies('refresh_token') token: string,
   ): Promise<Pick<AuthResponse, 'access_token'>> {
-    const refreshToken = req.cookies?.['refresh_token'];
-    return await this.authService.refresh(refreshToken);
+    return await this.authService.refresh(token);
   }
 }
