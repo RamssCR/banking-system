@@ -16,6 +16,10 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 300 })
   password: string;
 
+  @Exclude()
+  @Column({ type: 'varchar', length: 300, nullable: true })
+  refreshToken: string;
+
   @ManyToOne(() => Role, (role) => role.users)
   role: Role;
 
