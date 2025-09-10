@@ -36,7 +36,7 @@ export class SetAuthTokenInterceptor implements NestInterceptor {
 
         return {
           message: 'login successful',
-          user: data.user,
+          user: data?.user,
         };
       }),
     );
