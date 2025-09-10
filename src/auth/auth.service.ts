@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthResponse } from './interfaces/auth-response.interface';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
@@ -26,9 +31,14 @@ export class AuthService {
         throw new BadRequestException('Incorrect user or password');
 
       const payload: JwtPayload = { sub: user.id };
+      const refreshToken = await this.jwtRefresh.signAsync(payload);
+      const refreshHash = await bcrypt.hash(refreshToken, 12);
+
+      await this.userService.setRefreshToken(user.id, refreshHash);
+
       return {
         access_token: await this.jwtService.signAsync(payload),
-        refresh_token: await this.jwtRefresh.signAsync(payload),
+        refresh_token: refreshHash,
         user,
       };
     } catch (error) {
@@ -42,18 +52,41 @@ export class AuthService {
   async signUp(dto: SignUpDto): Promise<AuthResponse> {
     const { passwordConfirmation: _password, ...user } = dto;
     try {
-      const createduUser = await this.userService.create(user);
-      const payload: JwtPayload = { sub: createduUser.id };
+      const createdUser = await this.userService.create(user);
+      const payload: JwtPayload = { sub: createdUser.id };
+
+      const refreshToken = await this.jwtRefresh.signAsync(payload);
+      const refreshHash = await bcrypt.hash(refreshToken, 12);
+
+      await this.userService.setRefreshToken(createdUser.id, refreshHash);
+
       return {
         access_token: await this.jwtService.signAsync(payload),
-        refresh_token: await this.jwtRefresh.signAsync(payload),
-        user: createduUser,
+        refresh_token: refreshHash,
+        user: createdUser,
       };
     } catch (error) {
       throw handleDBError(
         error,
         'An error occured while trying to sign you up',
       );
+    }
+  }
+
+  async refresh(token: string): Promise<Pick<AuthResponse, 'access_token'>> {
+    try {
+      const payload = await this.jwtRefresh.verifyAsync<JwtPayload>(token);
+      const isValid = await this.userService.validateRefreshToken(
+        payload.sub,
+        token,
+      );
+
+      if (!isValid) throw new UnauthorizedException('Invalid refresh token');
+
+      const newAccess = await this.jwtService.signAsync(payload);
+      return { access_token: newAccess };
+    } catch {
+      throw new UnauthorizedException('Invalid refresh');
     }
   }
 }

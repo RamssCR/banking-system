@@ -6,6 +6,7 @@ import { Role } from '#roles/entities/role.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '#users/entities/user.entity';
 import { handleDBError } from '#common/helpers/handleDBErrors';
+import bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -111,6 +112,30 @@ export class UsersService {
       }
     } catch (error) {
       throw handleDBError(error, 'An error occurred while deleting the user');
+    }
+  }
+
+  async setRefreshToken(userId: number, token: string): Promise<void> {
+    try {
+      await this.userRepository.update(userId, {
+        refreshToken: token,
+      });
+    } catch (error) {
+      throw handleDBError(
+        error,
+        'An error occurred while setting refresh token',
+      );
+    }
+  }
+
+  async validateRefreshToken(userId: number, token: string): Promise<boolean> {
+    try {
+      const user = await this.userRepository.findOneBy({ id: userId });
+      if (!user || !user.refreshToken) return false;
+
+      return await bcrypt.compare(token, user.refreshToken);
+    } catch (error) {
+      throw handleDBError(error, 'Invalid refresh');
     }
   }
 }
