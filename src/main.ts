@@ -3,12 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 
 const bootstrap = async () => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.set('query parser', 'extended');
   app.use(helmet());
+  app.use(cookieParser());
 
   const config = app.get(ConfigService);
   await app.listen(config.get('PORT') ?? 3000);
