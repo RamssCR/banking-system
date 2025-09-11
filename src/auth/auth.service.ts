@@ -38,7 +38,7 @@ export class AuthService {
 
       return {
         access_token: await this.jwtService.signAsync(payload),
-        refresh_token: refreshHash,
+        refresh_token: refreshToken,
         user,
       };
     } catch (error) {
@@ -62,7 +62,7 @@ export class AuthService {
 
       return {
         access_token: await this.jwtService.signAsync(payload),
-        refresh_token: refreshHash,
+        refresh_token: refreshToken,
         user: createdUser,
       };
     } catch (error) {
@@ -83,7 +83,8 @@ export class AuthService {
 
       if (!isValid) throw new UnauthorizedException('Invalid refresh token');
 
-      const newAccess = await this.jwtService.signAsync(payload);
+      const newPayload: JwtPayload = { sub: payload.sub };
+      const newAccess = await this.jwtService.signAsync(newPayload);
       return { access_token: newAccess };
     } catch {
       throw new UnauthorizedException('Invalid refresh');
