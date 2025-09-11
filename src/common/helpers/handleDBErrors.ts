@@ -19,8 +19,8 @@ export const handleDBError = (error: unknown, message: string) => {
     return new NotFoundException(error.message);
   }
 
-  if (error instanceof Error && error.message.includes('Could not find')) {
-    return new NotFoundException(error.message);
+  if (error instanceof Error) {
+    return new BadRequestException(error.message);
   }
 
   return new InternalServerErrorException(message);
