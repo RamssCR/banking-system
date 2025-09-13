@@ -90,7 +90,7 @@ export class AuthService {
       const newAccess = await this.jwtService.signAsync(newPayload);
       return { access_token: newAccess };
     } catch {
-      throw new UnauthorizedException('Invalid refresh');
+      throw new UnauthorizedException('Invalid or expired refresh token');
     }
   }
 
