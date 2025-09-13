@@ -1,4 +1,4 @@
-import { JwtPayload } from '#auth/interfaces/jwt-payload.interface.js';
+import { JwtPayload } from '#auth/interfaces/jwt-payload.interface';
 import { Request } from 'express';
 
 export interface AuthRequest extends Request {
