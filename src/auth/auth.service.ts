@@ -30,7 +30,7 @@ export class AuthService {
       if (!isValidPassword)
         throw new BadRequestException('Incorrect user or password');
 
-      const payload: JwtPayload = { sub: user.id };
+      const payload: JwtPayload = { sub: user.id, role: user.role.name };
       const refreshToken = await this.jwtRefresh.signAsync(payload);
       const refreshHash = await bcrypt.hash(refreshToken, 12);
 
@@ -53,7 +53,10 @@ export class AuthService {
     const { passwordConfirmation: _password, ...user } = dto;
     try {
       const createdUser = await this.userService.create(user);
-      const payload: JwtPayload = { sub: createdUser.id };
+      const payload: JwtPayload = {
+        sub: createdUser.id,
+        role: createdUser.role.name,
+      };
 
       const refreshToken = await this.jwtRefresh.signAsync(payload);
       const refreshHash = await bcrypt.hash(refreshToken, 12);
@@ -83,11 +86,15 @@ export class AuthService {
 
       if (!isValid) throw new UnauthorizedException('Invalid refresh token');
 
-      const newPayload: JwtPayload = { sub: payload.sub };
+      const newPayload: JwtPayload = { ...payload };
       const newAccess = await this.jwtService.signAsync(newPayload);
       return { access_token: newAccess };
     } catch {
       throw new UnauthorizedException('Invalid refresh');
     }
+  }
+
+  async signOut(userId: number): Promise<void> {
+    await this.userService.removeRefreshToken(userId);
   }
 }
