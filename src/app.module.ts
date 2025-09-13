@@ -1,11 +1,23 @@
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { DatabaseModule } from './database/database.module';
+import { InterceptorsModule } from './common/interceptors/interceptors.module';
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller.js';
-import { AppService } from './app.service.js';
-import { UsersModule } from './users/users.module.js';
+import { PipesModule } from '#common/pipes/pipes.module';
+import { RolesModule } from './roles/roles.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   controllers: [AppController],
   providers: [AppService],
-  imports: [UsersModule],
+  imports: [
+    AuthModule,
+    DatabaseModule,
+    InterceptorsModule,
+    PipesModule,
+    RolesModule,
+    UsersModule,
+  ],
 })
 export class AppModule {}
