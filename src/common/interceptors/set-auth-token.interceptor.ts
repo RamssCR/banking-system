@@ -7,12 +7,16 @@ import {
 import { Observable, map } from 'rxjs';
 import type { AuthResponse } from '#auth/interfaces/auth-response.interface';
 import type { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class SetAuthTokenInterceptor implements NestInterceptor {
+  constructor(private readonly config: ConfigService) {}
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const ctx = context.switchToHttp();
     const res = ctx.getResponse<Response>();
+    const secure = this.config.get<string>('NODE_ENV') === 'production';
 
     return next.handle().pipe(
       map((data: AuthResponse) => {
@@ -21,7 +25,7 @@ export class SetAuthTokenInterceptor implements NestInterceptor {
             httpOnly: true,
             sameSite: 'strict',
             maxAge: 1000 * 60 * 60 * 24,
-            secure: false,
+            secure,
           });
         }
 
@@ -30,7 +34,7 @@ export class SetAuthTokenInterceptor implements NestInterceptor {
             httpOnly: true,
             sameSite: 'strict',
             maxAge: 1000 * 60 * 60 * 24 * 7,
-            secure: false,
+            secure,
           });
         }
 
