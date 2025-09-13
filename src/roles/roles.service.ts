@@ -43,7 +43,7 @@ export class RolesService {
         );
       }
     } catch (error) {
-      throw handleDBError(error, 'An error occurred while restoring the user');
+      throw handleDBError(error, 'An error occurred while restoring the role');
     }
   }
 
@@ -61,7 +61,7 @@ export class RolesService {
     try {
       const result = await this.roleRepository.softDelete(id);
       if (result.affected === 0)
-        throw new NotFoundException(`User with ID ${id} not found`);
+        throw new NotFoundException(`Role with ID ${id} not found`);
     } catch (error) {
       throw handleDBError(error, 'An error occurred while deleting the role');
     }

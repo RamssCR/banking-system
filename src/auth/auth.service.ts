@@ -71,7 +71,7 @@ export class AuthService {
     } catch (error) {
       throw handleDBError(
         error,
-        'An error occured while trying to sign you up',
+        'An error occurred while trying to sign you up',
       );
     }
   }
