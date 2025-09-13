@@ -138,4 +138,15 @@ export class UsersService {
       throw handleDBError(error, 'Invalid refresh');
     }
   }
+
+  async removeRefreshToken(userId: number): Promise<void> {
+    try {
+      await this.userRepository.update(userId, { refreshToken: null });
+    } catch (error) {
+      throw handleDBError(
+        error,
+        'An error occurred while removing the refresh token',
+      );
+    }
+  }
 }
