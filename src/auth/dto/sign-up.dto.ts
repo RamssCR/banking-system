@@ -4,7 +4,7 @@ import { Match } from '#common/decorators/match.decorator';
 export class SignUpDto {
   @IsNotEmpty()
   @IsString()
-  @MinLength(2)
+  @MinLength(6)
   username: string;
 
   @IsNotEmpty()
