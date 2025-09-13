@@ -4,6 +4,7 @@ import {
   CallHandler,
   Injectable,
 } from '@nestjs/common';
+import { MAX_AGE_ONE_DAY, MAX_AGE_SEVEN_DAYS } from '#common/helpers/constants';
 import { Observable, map } from 'rxjs';
 import type { AuthResponse } from '#auth/interfaces/auth-response.interface';
 import type { Response } from 'express';
@@ -24,7 +25,7 @@ export class SetAuthTokenInterceptor implements NestInterceptor {
           res.cookie('access_token', data.access_token, {
             httpOnly: true,
             sameSite: 'strict',
-            maxAge: 1000 * 60 * 60 * 24,
+            maxAge: MAX_AGE_ONE_DAY,
             secure,
           });
         }
@@ -33,7 +34,7 @@ export class SetAuthTokenInterceptor implements NestInterceptor {
           res.cookie('refresh_token', data.refresh_token, {
             httpOnly: true,
             sameSite: 'strict',
-            maxAge: 1000 * 60 * 60 * 24 * 7,
+            maxAge: MAX_AGE_SEVEN_DAYS,
             secure,
           });
         }

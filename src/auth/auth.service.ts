@@ -9,6 +9,7 @@ import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
+import { REFRESH_TOKEN_SALT_ROUNDS } from '#common/helpers/constants';
 import { UsersService } from '#users/users.service';
 import bcrypt from 'bcryptjs';
 import { handleDBError } from '#common/helpers/handleDBErrors';
@@ -32,7 +33,10 @@ export class AuthService {
 
       const payload: JwtPayload = { sub: user.id, role: user.role.name };
       const refreshToken = await this.jwtRefresh.signAsync(payload);
-      const refreshHash = await bcrypt.hash(refreshToken, 12);
+      const refreshHash = await bcrypt.hash(
+        refreshToken,
+        REFRESH_TOKEN_SALT_ROUNDS,
+      );
 
       await this.userService.setRefreshToken(user.id, refreshHash);
 
@@ -59,7 +63,10 @@ export class AuthService {
       };
 
       const refreshToken = await this.jwtRefresh.signAsync(payload);
-      const refreshHash = await bcrypt.hash(refreshToken, 12);
+      const refreshHash = await bcrypt.hash(
+        refreshToken,
+        REFRESH_TOKEN_SALT_ROUNDS,
+      );
 
       await this.userService.setRefreshToken(createdUser.id, refreshHash);
 
