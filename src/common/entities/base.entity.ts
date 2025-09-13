@@ -20,5 +20,5 @@ export abstract class BaseEntity {
 
   @Exclude()
   @DeleteDateColumn({ nullable: true })
-  deleteAt: Date;
+  deletedAt: Date;
 }
