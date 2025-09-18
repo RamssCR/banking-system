@@ -1,26 +1,126 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAccountDto } from './dto/create-account.dto';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Account } from './entities/account.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { UpdateAccountDto } from './dto/update-account.dto';
+import { UsersService } from '#users/users.service';
+import { generateAccountNumber } from '#common/helpers/luhnChecksum';
+import { handleDBError } from '#common/helpers/handleDBErrors';
 
 @Injectable()
 export class AccountsService {
-  create(createAccountDto: CreateAccountDto) {
-    return 'This action adds a new account';
+  constructor(
+    @InjectRepository(Account)
+    private readonly accountRepository: Repository<Account>,
+    private readonly usersService: UsersService,
+  ) {}
+
+  async findAll(page: number, limit: number, id: number) {
+    const [data, total] = await this.accountRepository.findAndCount({
+      where: { user: { id } },
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { createdAt: 'DESC' },
+      relations: ['transaction'],
+    });
+
+    return {
+      data,
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    };
   }
 
-  findAll() {
-    return `This action returns all accounts`;
+  async findOne(id: number, userId: number): Promise<Account> {
+    try {
+      return await this.accountRepository.findOneOrFail({
+        where: { id, user: { id: userId } },
+        relations: ['transaction'],
+      });
+    } catch (error) {
+      throw handleDBError(error, 'An error occurred while getting the account');
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} account`;
+  async create(id: number): Promise<Account> {
+    try {
+      const user = await this.usersService.findOne(id);
+
+      let accountNumber = generateAccountNumber();
+      const isExistingAccount = await this.findByAccountNumber(accountNumber);
+
+      if (isExistingAccount) {
+        accountNumber = generateAccountNumber();
+      }
+
+      const account = this.accountRepository.create({ accountNumber, user });
+      return await this.accountRepository.save(account);
+    } catch (error) {
+      throw handleDBError(
+        error,
+        'An error occurred while creating the account',
+      );
+    }
   }
 
-  update(id: number, updateAccountDto: UpdateAccountDto) {
-    return `This action updates a #${id} account`;
+  async restore(id: number): Promise<void> {
+    try {
+      const result = await this.accountRepository.restore(id);
+      if (result.affected === 0)
+        throw new InternalServerErrorException(
+          'An error occurred during account restoration',
+        );
+    } catch (error) {
+      throw handleDBError(
+        error,
+        'An error occurred during account restoration',
+      );
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} account`;
+  async update(
+    id: number,
+    userId: number,
+    updateAccountDto: UpdateAccountDto,
+  ): Promise<Account> {
+    try {
+      const account = await this.findOne(id, userId);
+      await this.accountRepository.update(account, updateAccountDto);
+      return await this.findOne(id, userId);
+    } catch (error) {
+      throw handleDBError(
+        error,
+        'An error occurred while updating the account',
+      );
+    }
+  }
+
+  async remove(id: number): Promise<void> {
+    try {
+      const result = await this.accountRepository.softDelete(id);
+      if (result.affected === 0)
+        throw new NotFoundException('Account was already deleted');
+    } catch (error) {
+      throw handleDBError(
+        error,
+        'An error occurred while deleting the account',
+      );
+    }
+  }
+
+  private async findByAccountNumber(accountNumber: string): Promise<Account> {
+    try {
+      return await this.accountRepository.findOneOrFail({
+        where: { accountNumber },
+        relations: ['transaction'],
+      });
+    } catch (error) {
+      throw handleDBError(error, 'An error occurred while getting the account');
+    }
   }
 }
