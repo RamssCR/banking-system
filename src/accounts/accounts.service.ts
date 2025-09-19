@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Account } from './entities/account.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Pagination } from '#types/pagination';
 import { Repository } from 'typeorm';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { UsersService } from '#users/users.service';
@@ -19,7 +20,11 @@ export class AccountsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async findAll(page: number, limit: number, id: number) {
+  async findAll(
+    page: number,
+    limit: number,
+    id: number,
+  ): Promise<Pagination<Account[]>> {
     const [data, total] = await this.accountRepository.findAndCount({
       where: { user: { id } },
       skip: (page - 1) * limit,

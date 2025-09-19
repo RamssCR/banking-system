@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Pagination } from '#types/pagination';
 import { Repository } from 'typeorm';
 import { Role } from '#roles/entities/role.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -17,7 +18,10 @@ export class UsersService {
     private readonly roleRepository: Repository<Role>,
   ) {}
 
-  async findAll(page: number = 1, limit: number = 10) {
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<Pagination<User[]>> {
     const [data, total] = await this.userRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
