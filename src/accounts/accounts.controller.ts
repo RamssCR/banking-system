@@ -1,0 +1,60 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
+import { Account } from './entities/account.entity';
+import { AccountsService } from './accounts.service';
+import { UpdateAccountDto } from './dto/update-account.dto';
+import { User } from '#common/decorators/user.decorator.js';
+
+@Controller('accounts')
+export class AccountsController {
+  constructor(private readonly accountsService: AccountsService) {}
+
+  @Get()
+  async findAll(
+    @User('sub') id: number,
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+  ) {
+    return await this.accountsService.findAll(page, limit, id);
+  }
+
+  @Get(':id')
+  async findOne(
+    @Param('id') id: number,
+    @User('sub') userId: number,
+  ): Promise<Account> {
+    return await this.accountsService.findOne(id, userId);
+  }
+
+  @Post()
+  async create(@User('sub') id: number): Promise<Account> {
+    return await this.accountsService.create(id);
+  }
+
+  @Patch(':id')
+  async restore(@Param('id') id: number) {
+    return await this.accountsService.restore(id);
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id') id: number,
+    @User('sub') userId: number,
+    @Body() updateAccountDto: UpdateAccountDto,
+  ) {
+    return await this.accountsService.update(id, userId, updateAccountDto);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: number) {
+    return await this.accountsService.remove(id);
+  }
+}
