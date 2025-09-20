@@ -19,13 +19,13 @@ export class AccountsService {
     private readonly usersService: UsersService,
   ) {}
 
-  async findAll(page: number, limit: number, id: number) {
+  async findAll(page: number = 1, limit: number = 10, id: number) {
     const [data, total] = await this.accountRepository.findAndCount({
       where: { user: { id } },
       skip: (page - 1) * limit,
       take: limit,
       order: { createdAt: 'DESC' },
-      relations: ['transaction'],
+      relations: ['transactionsTo', 'transactionsFrom'],
     });
 
     return {
@@ -40,7 +40,7 @@ export class AccountsService {
     try {
       return await this.accountRepository.findOneOrFail({
         where: { id, user: { id: userId } },
-        relations: ['transaction'],
+        relations: ['transactionsTo', 'transactionsFrom'],
       });
     } catch (error) {
       throw handleDBError(error, 'An error occurred while getting the account');
@@ -51,12 +51,13 @@ export class AccountsService {
     try {
       const user = await this.usersService.findOne(id);
 
-      let accountNumber = generateAccountNumber();
-      const isExistingAccount = await this.findByAccountNumber(accountNumber);
+      let accountNumber: string;
+      let existing: Account | null;
 
-      if (isExistingAccount) {
+      do {
         accountNumber = generateAccountNumber();
-      }
+        existing = await this.findByAccountNumber(accountNumber);
+      } while (existing);
 
       const account = this.accountRepository.create({ accountNumber, user });
       return await this.accountRepository.save(account);
@@ -90,7 +91,7 @@ export class AccountsService {
   ): Promise<Account> {
     try {
       const account = await this.findOne(id, userId);
-      await this.accountRepository.update(account, updateAccountDto);
+      await this.accountRepository.update({ id: account.id }, updateAccountDto);
       return await this.findOne(id, userId);
     } catch (error) {
       throw handleDBError(
@@ -113,11 +114,13 @@ export class AccountsService {
     }
   }
 
-  private async findByAccountNumber(accountNumber: string): Promise<Account> {
+  private async findByAccountNumber(
+    accountNumber: string,
+  ): Promise<Account | null> {
     try {
-      return await this.accountRepository.findOneOrFail({
+      return await this.accountRepository.findOne({
         where: { accountNumber },
-        relations: ['transaction'],
+        relations: ['transactionsTo', 'transactionsFrom'],
       });
     } catch (error) {
       throw handleDBError(error, 'An error occurred while getting the account');
