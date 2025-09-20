@@ -10,14 +10,16 @@ import {
 } from '@nestjs/common';
 import { Account } from './entities/account.entity';
 import { AccountsService } from './accounts.service';
+import { Roles } from '#common/decorators/roles.decorator';
 import { UpdateAccountDto } from './dto/update-account.dto';
-import { User } from '#common/decorators/user.decorator.js';
+import { User } from '#common/decorators/user.decorator';
 
 @Controller('accounts')
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}
 
   @Get()
+  @Roles('admin', 'moderator')
   async findAll(
     @User('sub') id: number,
     @Query('page') page: number,
@@ -39,11 +41,13 @@ export class AccountsController {
     return await this.accountsService.create(id);
   }
 
-  @Patch(':id')
+  @Roles('admin')
+  @Patch(':id/restore')
   async restore(@Param('id') id: number) {
     return await this.accountsService.restore(id);
   }
 
+  @Roles('admin', 'moderator')
   @Patch(':id')
   async update(
     @Param('id') id: number,
@@ -53,6 +57,7 @@ export class AccountsController {
     return await this.accountsService.update(id, userId, updateAccountDto);
   }
 
+  @Roles('admin')
   @Delete(':id')
   async remove(@Param('id') id: number) {
     return await this.accountsService.remove(id);
