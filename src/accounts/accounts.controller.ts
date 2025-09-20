@@ -20,7 +20,6 @@ export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}
 
   @Get()
-  @Roles('admin', 'moderator')
   async findAll(
     @User('sub') id: number,
     @Query('page') page: number,
