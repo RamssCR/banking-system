@@ -11,6 +11,7 @@ import {
 import { Account } from './entities/account.entity';
 import { AccountsService } from './accounts.service';
 import { Roles } from '#common/decorators/roles.decorator';
+import { Pagination } from '#types/pagination';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { User } from '#common/decorators/user.decorator';
 
@@ -24,7 +25,7 @@ export class AccountsController {
     @User('sub') id: number,
     @Query('page') page: number,
     @Query('limit') limit: number,
-  ) {
+  ): Promise<Pagination<Account[]>> {
     return await this.accountsService.findAll(page, limit, id);
   }
 
