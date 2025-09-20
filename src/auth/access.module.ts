@@ -1,18 +1,21 @@
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { JWT_ACCESS } from '#common/helpers/constants';
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [
-    JwtModule.registerAsync({
+  imports: [JwtModule],
+  providers: [
+    {
+      provide: JWT_ACCESS,
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        global: true,
-        secret: config.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '1d' },
-      }),
-    }),
+      useFactory: (config: ConfigService) =>
+        new JwtService({
+          secret: config.get<string>('JWT_SECRET'),
+          signOptions: { expiresIn: '1d' },
+        }),
+    },
   ],
-  exports: [JwtModule],
+  exports: [JWT_ACCESS],
 })
 export class AccessModule {}
