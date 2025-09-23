@@ -1,5 +1,6 @@
-import { IsOptional, IsPositive } from 'class-validator';
+import { IsNumberString, IsOptional, IsPositive } from 'class-validator';
 import { Type } from 'class-transformer';
+import { PartialType } from '@nestjs/mapped-types';
 
 export class PaginationDto {
   @IsOptional()
@@ -11,4 +12,10 @@ export class PaginationDto {
   @Type(() => Number)
   @IsPositive()
   limit?: number = 10;
+}
+
+export class TransactionPaginationDto extends PartialType(PaginationDto) {
+  @Type(() => String)
+  @IsNumberString()
+  accountNumber: string;
 }
