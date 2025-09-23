@@ -6,28 +6,34 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
-import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { Pagination } from '#types/pagination';
+import { Transaction } from './entities/transaction.entity';
+import { TransactionPaginationDto } from '#common/dtos/pagination.dto';
+import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 
 @Controller('transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
-  @Post()
-  create(@Body() createTransactionDto: CreateTransactionDto) {
-    return this.transactionsService.create(createTransactionDto);
-  }
-
   @Get()
-  findAll() {
-    return this.transactionsService.findAll();
+  async findAll(
+    @Query() { accountNumber, page, limit }: TransactionPaginationDto,
+  ): Promise<Pagination<Transaction[]>> {
+    return await this.transactionsService.findAll(accountNumber, page, limit);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.transactionsService.findOne(+id);
+  async findOne(@Param('id') id: number): Promise<Transaction> {
+    return await this.transactionsService.findOne(id);
+  }
+
+  @Post()
+  create(@Body() createTransactionDto: CreateTransactionDto) {
+    return this.transactionsService.create(createTransactionDto);
   }
 
   @Patch(':id')
