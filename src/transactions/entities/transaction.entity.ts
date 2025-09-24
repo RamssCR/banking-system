@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { Account } from '#accounts/entities/account.entity';
 import { BaseEntity } from '#common/entities/base.entity';
+import { Exclude } from 'class-transformer';
 import { User } from '#users/entities/user.entity';
 
 export type TransactionType = 'deposit' | 'withdraw' | 'transfer';
@@ -37,5 +38,6 @@ export class Transaction extends BaseEntity {
   destinationAccount: Account;
 
   @ManyToOne(() => User, (user) => user.transactions, { onDelete: 'CASCADE' })
+  @Exclude()
   performedBy: User;
 }
