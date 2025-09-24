@@ -3,17 +3,16 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Query,
 } from '@nestjs/common';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Pagination } from '#types/pagination';
 import { Transaction } from './entities/transaction.entity';
 import { TransactionPaginationDto } from '#common/dtos/pagination.dto';
 import { TransactionsService } from './transactions.service';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { SingleAccountOperationDto } from './dto/create-transaction.dto';
+import { User } from '#common/decorators/user.decorator.js';
 
 @Controller('transactions')
 export class TransactionsController {
@@ -31,17 +30,12 @@ export class TransactionsController {
     return await this.transactionsService.findOne(id);
   }
 
-  @Post()
-  create(@Body() createTransactionDto: CreateTransactionDto) {
-    return this.transactionsService.create(createTransactionDto);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateTransactionDto: UpdateTransactionDto,
-  ) {
-    return this.transactionsService.update(+id, updateTransactionDto);
+  @Post('deposit')
+  async deposit(
+    @User('sub') userId: number,
+    @Body() depositDto: SingleAccountOperationDto,
+  ): Promise<Transaction> {
+    return await this.transactionsService.deposit(userId, depositDto);
   }
 
   @Delete(':id')
