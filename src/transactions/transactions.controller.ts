@@ -12,7 +12,7 @@ import { Transaction } from './entities/transaction.entity';
 import { TransactionPaginationDto } from '#common/dtos/pagination.dto';
 import { TransactionsService } from './transactions.service';
 import { SingleAccountOperationDto } from './dto/create-transaction.dto';
-import { User } from '#common/decorators/user.decorator.js';
+import { User } from '#common/decorators/user.decorator';
 
 @Controller('transactions')
 export class TransactionsController {
