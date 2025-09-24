@@ -1,4 +1,5 @@
 import { AccountsModule } from '#accounts/accounts.module';
+import { DatabaseTransactionService } from '#database/database-transaction.service.js';
 import { Module } from '@nestjs/common';
 import { Transaction } from './entities/transaction.entity';
 import { TransactionsController } from './transactions.controller';
@@ -13,7 +14,7 @@ import { UsersModule } from '#users/users.module';
     TypeOrmModule.forFeature([Transaction]),
   ],
   controllers: [TransactionsController],
-  providers: [TransactionsService],
+  providers: [TransactionsService, DatabaseTransactionService],
   exports: [TypeOrmModule],
 })
 export class TransactionsModule {}
