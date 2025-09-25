@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Account } from '#accounts/entities/account.entity.js';
+import { Account } from '#accounts/entities/account.entity';
+import { DatabaseTransactionService } from '#database/database-transaction.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Pagination } from '#types/pagination';
 import { Repository } from 'typeorm';
 import { SingleAccountOperationDto } from './dto/create-transaction.dto';
 import { Transaction } from './entities/transaction.entity';
-import { UsersService } from '#users/users.service.js';
+import { User } from '#users/entities/user.entity';
+import { UsersService } from '#users/users.service';
 import { handleDBError } from '#common/helpers/handleDBErrors';
-import { User } from '#users/entities/user.entity.js';
-import { DatabaseTransactionService } from '#database/database-transaction.service.js';
 
 @Injectable()
 export class TransactionsService {
@@ -27,7 +27,10 @@ export class TransactionsService {
     limit: number = 10,
   ): Promise<Pagination<Transaction[]>> {
     const [data, total] = await this.transactionRepository.findAndCount({
-      where: { sourceAccount: { accountNumber } },
+      where: [
+        { sourceAccount: { accountNumber } },
+        { destinationAccount: { accountNumber } },
+      ],
       skip: (page - 1) * limit,
       take: limit,
       order: { createdAt: 'DESC' },
@@ -70,7 +73,7 @@ export class TransactionsService {
 
           const user = await this.getUser(userId);
 
-          account.balance += depositDto.amount;
+          account.balance = Number(account.balance) + depositDto.amount;
           await queryRunner.manager.save(account);
 
           const transaction = this.transactionRepository.create({
