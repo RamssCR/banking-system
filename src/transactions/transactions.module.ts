@@ -1,5 +1,5 @@
 import { AccountsModule } from '#accounts/accounts.module';
-import { DatabaseTransactionService } from '#database/database-transaction.service.js';
+import { DatabaseTransactionService } from '#database/database-transaction.service';
 import { Module } from '@nestjs/common';
 import { Transaction } from './entities/transaction.entity';
 import { TransactionsController } from './transactions.controller';
