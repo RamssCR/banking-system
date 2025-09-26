@@ -11,10 +11,10 @@ export class SingleAccountOperationDto extends BaseTransactionDto {
   accountNumber: string;
 }
 
-export class TranferenceDto extends BaseTransactionDto {
+export class TransferenceDto extends BaseTransactionDto {
   @IsNumberString()
   @IsNotEmpty()
-  originAccountNumber: string;
+  sourceAccountNumber: string;
 
   @IsNumberString()
   @IsNotEmpty()
