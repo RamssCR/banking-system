@@ -8,7 +8,16 @@ export class Account extends BaseEntity {
   @Column({ type: 'varchar', length: 11, unique: true })
   accountNumber: string;
 
-  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
+  @Column({
+    type: 'decimal',
+    precision: 15,
+    scale: 2,
+    default: 0,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => Number(value),
+    },
+  })
   balance: number;
 
   @OneToMany(() => Transaction, (transaction) => transaction.sourceAccount)
