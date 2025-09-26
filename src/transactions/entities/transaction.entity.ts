@@ -1,11 +1,16 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Account } from '#accounts/entities/account.entity';
 import { BaseEntity } from '#common/entities/base.entity';
 import { Exclude } from 'class-transformer';
 import { User } from '#users/entities/user.entity';
 
-export type TransactionType = 'deposit' | 'withdraw' | 'transfer';
-export type TransactionStatus = 'pending' | 'failed' | 'completed';
+export type TransactionType = 'deposit' | 'withdraw' | 'transfer' | 'reverse';
+export type TransactionStatus =
+  | 'pending'
+  | 'failed'
+  | 'completed'
+  | 'reversed'
+  | 'cancelled';
 
 @Entity()
 export class Transaction extends BaseEntity {
@@ -20,7 +25,7 @@ export class Transaction extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: ['pending', 'failed', 'completed'],
+    enum: ['pending', 'failed', 'completed', 'reversed', 'cancelled'],
     default: 'pending',
   })
   status: TransactionStatus;
@@ -40,4 +45,15 @@ export class Transaction extends BaseEntity {
   @ManyToOne(() => User, (user) => user.transactions, { onDelete: 'CASCADE' })
   @Exclude()
   performedBy: User;
+
+  @ManyToOne(() => Transaction, (transaction) => transaction.reversals, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @Exclude()
+  referenceTo: Transaction;
+
+  @OneToMany(() => Transaction, (transaction) => transaction.referenceTo)
+  @Exclude()
+  reversals: Transaction[];
 }
