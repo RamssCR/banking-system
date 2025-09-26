@@ -1,10 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  SingleAccountOperationDto,
+  TransferenceDto,
+} from './dto/create-transaction.dto';
 import { Account } from '#accounts/entities/account.entity';
 import { DatabaseTransactionService } from '#database/database-transaction.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Pagination } from '#types/pagination';
 import { Repository } from 'typeorm';
-import { SingleAccountOperationDto } from './dto/create-transaction.dto';
 import { Transaction } from './entities/transaction.entity';
 import { User } from '#users/entities/user.entity';
 import { UsersService } from '#users/users.service';
@@ -15,8 +22,6 @@ export class TransactionsService {
   constructor(
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
-    @InjectRepository(Account)
-    private readonly accountRepository: Repository<Account>,
     private readonly usersService: UsersService,
     private readonly dbTransactionService: DatabaseTransactionService,
   ) {}
@@ -68,12 +73,12 @@ export class TransactionsService {
             where: { accountNumber: depositDto.accountNumber },
             lock: { mode: 'pessimistic_write' },
           });
-          if (!account)
-            throw new NotFoundException('An error occurred during deposit');
+          if (!account) throw new NotFoundException('Account not found');
 
           const user = await this.getUser(userId);
+          console.log(typeof account.balance);
 
-          account.balance = Number(account.balance) + depositDto.amount;
+          account.balance += depositDto.amount;
           await queryRunner.manager.save(account);
 
           const transaction = this.transactionRepository.create({
@@ -81,6 +86,7 @@ export class TransactionsService {
             type: 'deposit',
             destinationAccount: account,
             performedBy: user,
+            status: 'completed',
           });
 
           return await queryRunner.manager.save(transaction);
@@ -94,36 +100,100 @@ export class TransactionsService {
     );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} transaction`;
+  async withdraw(
+    userId: number,
+    withdrawDto: SingleAccountOperationDto,
+  ): Promise<Transaction> {
+    return this.dbTransactionService.execute<Transaction>(
+      async (queryRunner) => {
+        try {
+          const account = await queryRunner.manager.findOne(Account, {
+            where: { accountNumber: withdrawDto.accountNumber },
+            lock: { mode: 'pessimistic_write' },
+          });
+          if (!account) throw new NotFoundException('Account not found');
+          const user = await this.getUser(userId);
+
+          if (account.balance < withdrawDto.amount)
+            throw new BadRequestException(
+              'Insufficient funds for withdrawal operation',
+            );
+
+          account.balance -= withdrawDto.amount;
+          await queryRunner.manager.save(account);
+
+          const transaction = this.transactionRepository.create({
+            amount: withdrawDto.amount,
+            type: 'withdraw',
+            sourceAccount: account,
+            performedBy: user,
+            status: 'completed',
+          });
+
+          return await queryRunner.manager.save(transaction);
+        } catch (error) {
+          throw handleDBError(error, 'An error occurred during withdrawal');
+        }
+      },
+    );
+  }
+
+  async transfer(
+    userId: number,
+    tranferDto: TransferenceDto,
+  ): Promise<Transaction> {
+    return await this.dbTransactionService.execute<Transaction>(
+      async (queryRunner) => {
+        try {
+          const sourceAccount = await queryRunner.manager.findOne(Account, {
+            where: { accountNumber: tranferDto.sourceAccountNumber },
+            lock: { mode: 'pessimistic_write' },
+          });
+          const destinationAccount = await queryRunner.manager.findOne(
+            Account,
+            {
+              where: { accountNumber: tranferDto.destinationAccountNumber },
+              lock: { mode: 'pessimistic_write' },
+            },
+          );
+
+          if (!sourceAccount || !destinationAccount)
+            throw new NotFoundException('One of the account was not found');
+
+          if (sourceAccount.accountNumber === destinationAccount.accountNumber)
+            throw new BadRequestException(
+              'Cannot perform tranference operation to the same account',
+            );
+
+          if (sourceAccount.balance < tranferDto.amount)
+            throw new BadRequestException(
+              'Insufficient funds for transference operation',
+            );
+
+          const user = await this.getUser(userId);
+
+          sourceAccount.balance -= tranferDto.amount;
+          destinationAccount.balance += tranferDto.amount;
+          await queryRunner.manager.save([sourceAccount, destinationAccount]);
+
+          const transaction = this.transactionRepository.create({
+            amount: tranferDto.amount,
+            type: 'transfer',
+            sourceAccount,
+            destinationAccount,
+            performedBy: user,
+            status: 'completed',
+          });
+
+          return await queryRunner.manager.save(transaction);
+        } catch (error) {
+          throw handleDBError(error, 'An error occurred during transference');
+        }
+      },
+    );
   }
 
   private async getUser(id: number): Promise<User> {
     return await this.usersService.findOne(id);
   }
 }
-
-/*
-  Steps to create a transaction:
-  (FIRST) Identify the transaction type to perform (Withdrawal, Tranference, Deposit)
-
-  Deposit: (method)
-  1.a. Get the destination account money is gonna be deposited on.
-  1.b. Get the amount of money to deposit.
-  1.c. Get the user who started the transaction.
-  1.d. Update the destination account with the respective amount.
-
-  Withdrawal: (method)
-  2.a. Get the destination account money is gonna be withdrawed from.
-  2.b. Get the amount of money to withdraw.
-  2.c. Validate if the account has the requested amount to withdraw.
-  2.d. Get the user who started the transaction.
-  2.e. Update the destionation account with the respective amount.
-
-  Transference: (method)
-  3.a. Get both the origin account and the destination account.
-  3.b. Get the amount of money to transfer.
-  3.c. Validate if the origin account has the requested amount to transfer.
-  3.d. Get the user who started the transaction.
-  4.e. Update both accounts adding the amount to the destination account and substracting it from the origin one.
-*/

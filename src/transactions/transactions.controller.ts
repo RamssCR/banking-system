@@ -1,17 +1,12 @@
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
+  SingleAccountOperationDto,
+  TransferenceDto,
+} from './dto/create-transaction.dto';
 import { Pagination } from '#types/pagination';
 import { Transaction } from './entities/transaction.entity';
 import { TransactionPaginationDto } from '#common/dtos/pagination.dto';
 import { TransactionsService } from './transactions.service';
-import { SingleAccountOperationDto } from './dto/create-transaction.dto';
 import { User } from '#common/decorators/user.decorator';
 
 @Controller('transactions')
@@ -38,8 +33,19 @@ export class TransactionsController {
     return await this.transactionsService.deposit(userId, depositDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.transactionsService.remove(+id);
+  @Post('withdraw')
+  async withdraw(
+    @User('sub') userId: number,
+    @Body() withdrawDto: SingleAccountOperationDto,
+  ): Promise<Transaction> {
+    return await this.transactionsService.withdraw(userId, withdrawDto);
+  }
+
+  @Post('transfer')
+  async transfer(
+    @User('sub') userId: number,
+    @Body() transferDto: TransferenceDto,
+  ): Promise<Transaction> {
+    return await this.transactionsService.transfer(userId, transferDto);
   }
 }
