@@ -1,6 +1,4 @@
 import { AccountsModule } from './accounts/accounts.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { InterceptorsModule } from './common/interceptors/interceptors.module';
@@ -11,8 +9,6 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
-  controllers: [AppController],
-  providers: [AppService],
   imports: [
     AuthModule,
     DatabaseModule,
