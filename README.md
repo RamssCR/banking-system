@@ -41,7 +41,7 @@ The goal of this project is to explore **clean architecture, good practices, dat
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 src
@@ -57,8 +57,7 @@ src
 
 ---
 
-## ⚙️ Environment Variables
-
+## Environment Variables
 The app requires a `.env` file at the project root with the following configuration:
 
 ```shell
@@ -76,7 +75,7 @@ JWT_REFRESH_SECRET=your_jwt_refresh_secret
 
 ---
 
-## 🚀 Installation & Running
+## Installation & Running
 
 1. **Clone repository**
 
