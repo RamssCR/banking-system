@@ -1,98 +1,134 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Banking System API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A **learning project built with [NestJS](https://nestjs.com/)** simulating a simplified **banking system**.
+The goal of this project is to explore **clean architecture, good practices, database transactions, and modular design** while implementing realistic banking operations such as deposits, withdrawals, and transfers.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Main Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+* **User Management**:
+  Create and manage users with associated accounts.
 
-## Project setup
+* **Accounts**:
 
-```bash
-$ npm install
+  * Each user can own one or more bank accounts.
+  * Accounts maintain a balance and unique account number (validated with the **Luhn algorithm**).
+
+* **Transactions**:
+
+  * **Deposits**: Increase balance on a destination account.
+  * **Withdrawals**: Decrease balance on a source account (validating sufficient funds).
+  * **Transfers**: Move funds between two accounts atomically.
+  * All operations use **database transactions with locks** to ensure data consistency.
+
+* **Audit Fields**:
+  Each transaction stores who performed it (`performedBy`) and supports possible reversals or references for rollback-like behavior.
+
+* **JWT Authentication**:
+  With **access** and **refresh tokens** for secure endpoints.
+
+---
+
+## Tech Stack
+
+* **Backend Framework**: [NestJS](https://nestjs.com/)
+* **Database ORM**: [TypeORM](https://typeorm.io/)
+* **Database**: PostgreSQL
+* **Authentication**: JWT (access & refresh tokens)
+* **Validation & Pipes**: Class-validator + Class-transformer
+* **Error Handling**: Custom helpers for DB errors and global exception filters
+
+---
+
+## Project Structure
+
+```
+src
+ ├── accounts/          # Account entity, service, controller
+ ├── auth/              # Auth entity, service, controller
+ ├── transactions/      # Transaction entity, service, controller
+ ├── users/             # User entity, service, controller
+ ├── roles/             # Role entity, service, controller
+ ├── common/            # Shared modules: entities, interceptors, filters, helpers
+ ├── app.module.ts      # Root module
+ └── main.ts            # Application bootstrap
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+## Environment Variables
+The app requires a `.env` file at the project root with the following configuration:
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```shell
+NODE_ENV=development
+ALLOWED_ORIGINS=http://localhost:3000
+PORT=2001
+DB_HOST=localhost
+DB_NAME=banking_system
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_PORT=5432
+JWT_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_jwt_refresh_secret
 ```
 
-## Run tests
+---
+
+## Installation & Running
+
+1. **Clone repository**
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+git clone https://github.com/RamssCR/banking-system.git
+cd banking-system
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+2. **Install dependencies**
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+3. **Setup environment**
 
-## Resources
+* Create `.env` file at project root with variables above.
 
-Check out a few resources that may come in handy when working with NestJS:
+4. **Start development server**
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+npm run start:dev
+```
 
-## Support
+The app will run at: `http://localhost:2001`
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+---
 
-## Stay in touch
+## API Endpoints (Overview)
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Accounts
 
-## License
+* `POST /accounts` → Create account
+* `GET /accounts` → List accounts (with transactions)
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Transactions
+
+* `POST /transactions/deposit` → Deposit funds
+* `POST /transactions/withdraw` → Withdraw funds
+* `POST /transactions/transfer` → Transfer funds
+
+### Auth
+
+* `POST /auth/register` → Register new user
+* `POST /auth/login` → Login user
+
+---
+
+## Purpose of this Project
+
+This project was built as a **learning path to NestJS**, focusing on:
+
+* Clean architecture & dependency injection.
+* Using **database transactions and pessimistic locks** for financial operations.
+* Writing code that is **testable** and scalable.
+* Applying **realistic banking concepts** to better understand how critical systems work.

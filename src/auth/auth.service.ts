@@ -4,12 +4,16 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import {
+  JWT_ACCESS,
+  JWT_REFRESH,
+  REFRESH_TOKEN_SALT_ROUNDS,
+} from '#common/helpers/constants';
 import { AuthResponse } from './interfaces/auth-response.interface';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { REFRESH_TOKEN_SALT_ROUNDS } from '#common/helpers/constants';
 import { UsersService } from '#users/users.service';
 import bcrypt from 'bcryptjs';
 import { handleDBError } from '#common/helpers/handleDBErrors';
@@ -18,8 +22,9 @@ import { handleDBError } from '#common/helpers/handleDBErrors';
 export class AuthService {
   constructor(
     private readonly userService: UsersService,
+    @Inject(JWT_ACCESS)
     private readonly jwtService: JwtService,
-    @Inject('JWT_REFRESH_SERVICE')
+    @Inject(JWT_REFRESH)
     private readonly jwtRefresh: JwtService,
   ) {}
 
@@ -93,10 +98,11 @@ export class AuthService {
 
       if (!isValid) throw new UnauthorizedException('Invalid refresh token');
 
-      const newPayload: JwtPayload = { ...payload };
+      const newPayload: JwtPayload = { sub: payload.sub, role: payload.role };
       const newAccess = await this.jwtService.signAsync(newPayload);
       return { access_token: newAccess };
-    } catch {
+    } catch (error) {
+      console.error(error);
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
   }

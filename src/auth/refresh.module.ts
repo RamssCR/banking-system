@@ -1,24 +1,21 @@
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { JWT_REFRESH } from '#common/helpers/constants';
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [
-    JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        global: false,
-        secret: config.get<string>('JWT_REFRESH_SECRET'),
-        signOptions: { expiresIn: '7d' },
-      }),
-    }),
-  ],
+  imports: [JwtModule],
   providers: [
     {
-      provide: 'JWT_REFRESH_SERVICE',
-      useExisting: JwtService,
+      provide: JWT_REFRESH,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) =>
+        new JwtService({
+          secret: config.get<string>('JWT_REFRESH_SECRET'),
+          signOptions: { expiresIn: '7d' },
+        }),
     },
   ],
-  exports: ['JWT_REFRESH_SERVICE'],
+  exports: [JWT_REFRESH],
 })
 export class RefreshModule {}

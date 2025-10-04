@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { Pagination } from '#types/pagination';
 import { PaginationDto } from '#common/dtos/pagination.dto';
 import { Roles } from '#common/decorators/roles.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -21,7 +22,9 @@ export class UsersController {
 
   @Roles('admin', 'moderator')
   @Get()
-  async findAll(@Query() { limit, page }: PaginationDto) {
+  async findAll(
+    @Query() { limit, page }: PaginationDto,
+  ): Promise<Pagination<User[]>> {
     return this.usersService.findAll(page, limit);
   }
 

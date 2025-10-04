@@ -2,11 +2,12 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { NestFactory } from '@nestjs/core';
-import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 
 const bootstrap = async () => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.setGlobalPrefix('/api/v1');
 
   app.set('query parser', 'extended');
   app.use(helmet());

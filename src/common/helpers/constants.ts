@@ -13,4 +13,34 @@ const MAX_AGE_SEVEN_DAYS = MAX_AGE_ONE_DAY * 7;
  */
 const REFRESH_TOKEN_SALT_ROUNDS = 12;
 
-export { MAX_AGE_ONE_DAY, MAX_AGE_SEVEN_DAYS, REFRESH_TOKEN_SALT_ROUNDS };
+/**
+ * Prefix for account numbers.
+ * This is used to identify account numbers in the system.
+ */
+const ACCOUNT_NUMBER_PREFIX = '01';
+
+/**
+ * Base value for generating account numbers.
+ * This is used as a starting point for account number generation.
+ */
+const ACCOUNT_NUMBER_BASE_VALUE = 10000000;
+
+/**
+ * Access service name to inject in other services.
+ */
+const JWT_ACCESS = 'JWT_ACCESS_SERVICE';
+
+/**
+ * Refresh service name to inject in other services.
+ */
+const JWT_REFRESH = 'JWT_REFRESH_SERVICE';
+
+export {
+  MAX_AGE_ONE_DAY,
+  MAX_AGE_SEVEN_DAYS,
+  REFRESH_TOKEN_SALT_ROUNDS,
+  ACCOUNT_NUMBER_PREFIX,
+  ACCOUNT_NUMBER_BASE_VALUE,
+  JWT_ACCESS,
+  JWT_REFRESH,
+};
