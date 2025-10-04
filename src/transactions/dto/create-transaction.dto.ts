@@ -1,7 +1,13 @@
-import { IsNotEmpty, IsNumber, IsNumberString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsNumberString,
+  IsPositive,
+} from 'class-validator';
 
 abstract class BaseTransactionDto {
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @IsPositive()
   amount: number;
 }
 

@@ -5,7 +5,6 @@ import { ACCOUNT_NUMBER_BASE_VALUE, ACCOUNT_NUMBER_PREFIX } from './constants';
  * The input string should not include the checksum digit itself.
  * @param base - The numeric string to calculate the checksum for.
  * @returns The Luhn checksum digit.
- * @throws Will throw an error if the input string contains non-digit characters.
  * @example
  * const checksum = luhnChecksum("7992739871"); // returns 3
  */
@@ -13,7 +12,7 @@ export const luhnChecksum = (base: string): number => {
   let sum = 0;
   let shouldDouble = true;
 
-  for (let i = base.length - 1; i > 0; i--) {
+  for (let i = base.length - 1; i >= 0; i--) {
     let digit = parseInt(base[i], 10);
 
     if (shouldDouble) {

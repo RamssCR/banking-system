@@ -74,9 +74,7 @@ export class TransactionsService {
             lock: { mode: 'pessimistic_write' },
           });
           if (!account) throw new NotFoundException('Account not found');
-
           const user = await this.getUser(userId);
-          console.log(typeof account.balance);
 
           account.balance += depositDto.amount;
           await queryRunner.manager.save(account);
@@ -158,11 +156,11 @@ export class TransactionsService {
           );
 
           if (!sourceAccount || !destinationAccount)
-            throw new NotFoundException('One of the account was not found');
+            throw new NotFoundException('One of the accounts was not found');
 
           if (sourceAccount.accountNumber === destinationAccount.accountNumber)
             throw new BadRequestException(
-              'Cannot perform tranference operation to the same account',
+              'Cannot perform tranfer operation to the same account',
             );
 
           if (sourceAccount.balance < tranferDto.amount)

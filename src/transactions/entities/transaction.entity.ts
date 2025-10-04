@@ -17,7 +17,10 @@ export class Transaction extends BaseEntity {
   @Column({ type: 'float', default: 0 })
   amount: number;
 
-  @Column({ type: 'enum', enum: ['deposit', 'withdraw', 'transfer'] })
+  @Column({
+    type: 'enum',
+    enum: ['deposit', 'withdraw', 'transfer', 'reverse'],
+  })
   type: TransactionType;
 
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })

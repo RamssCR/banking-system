@@ -23,7 +23,7 @@ export class AccountsController {
   @Get()
   async findAll(
     @User('sub') id: number,
-    @Query('page') { page, limit }: PaginationDto,
+    @Query() { page, limit }: PaginationDto,
   ): Promise<Pagination<Account[]>> {
     return await this.accountsService.findAll(page, limit, id);
   }
